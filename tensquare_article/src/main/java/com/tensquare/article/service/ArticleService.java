@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import util.IdWorker;
@@ -18,6 +19,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
@@ -28,6 +30,9 @@ public class ArticleService {
 
     @Autowired
     private IdWorker idWorker;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     public void updateState(String id ){
         articleDao.updateState(id);
@@ -43,7 +48,15 @@ public class ArticleService {
     }
 
     public Article findById(String id){
-        return articleDao.findById(id).get();
+        //先从缓存中获取
+        Article article =  (Article) redisTemplate.opsForValue().get("article_"+id);
+        if(article==null){
+            //从数据库中获取
+            article = articleDao.findById(id).get();
+            //放入redis
+            redisTemplate.opsForValue().set("article_"+id,article,10, TimeUnit.MINUTES);
+        }
+        return article;
     }
 
     public void save(Article article){
@@ -52,10 +65,14 @@ public class ArticleService {
     }
 
     public void update(Article article){
+        //先删除缓存
+        redisTemplate.delete("article_"+article.getId());
         articleDao.save(article);
     }
 
     public void deleteById(String id){
+        //删除缓存
+        redisTemplate.delete("article_"+id);
         articleDao.deleteById(id);
     }
 

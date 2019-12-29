@@ -1,6 +1,7 @@
 package com.tensquare.qa.controller;
 
 
+import com.tensquare.qa.client.BaseClient;
 import com.tensquare.qa.pojo.Problem;
 import com.tensquare.qa.service.ProblemService;
 import entity.PageResult;
@@ -9,9 +10,12 @@ import entity.StatusCode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Api(value = "/problem",tags = "问答模块")
 @RestController
@@ -21,6 +25,18 @@ public class ProblemController {
 
     @Autowired
     private ProblemService problemService;
+
+    @Autowired
+    private HttpServletRequest request;
+
+    @Autowired
+    private BaseClient baseClient;
+
+    @GetMapping("/label/{labelId}")
+    public Result findByLabelid(@PathVariable("labelId") String labelId){
+        return baseClient.findById(labelId);
+    }
+
 
     @PostMapping("/newlist/{labelId}/{page}/{size}")
     @ApiOperation(value = "查询最新问答",notes = "查询最新问答")
@@ -63,6 +79,10 @@ public class ProblemController {
     @PostMapping
     @ApiOperation(value = "添加",notes = "添加")
     public Result save(@RequestBody Problem problem){
+        String token = (String) request.getAttribute("claims_user");
+        if(StringUtils.isEmpty(token)){
+            return new Result(false, StatusCode.ACCESSERROR,"权限不足");
+        }
         problemService.save(problem);
         return new Result(true, StatusCode.OK,"添加成功");
     }

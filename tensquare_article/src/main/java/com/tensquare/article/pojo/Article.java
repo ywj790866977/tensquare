@@ -3,6 +3,7 @@ package com.tensquare.article.pojo;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Date;
  **/
 @Entity
 @Table(name = "tb_article")
-public class Article {
+public class Article implements Serializable {
     @Id
     private String id;
     private String columnid;
