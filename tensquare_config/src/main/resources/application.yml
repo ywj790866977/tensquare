@@ -8,3 +8,12 @@ spring:
       server:
         git:
           uri: https://gitee.com/ywj790866977/tensquare_dev.git
+  rabbitmq:
+    host: 192.168.184.128
+    username: guest
+    password: niunan789
+management:
+  endpoints:
+    web:
+      exposure:
+        include: bus-refresh
