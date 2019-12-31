@@ -1,6 +1,5 @@
 package com.tensquare.recruit.service;
 
-import com.sun.tools.javac.comp.Enter;
 import com.tensquare.recruit.dao.EnterpriseDao;
 import com.tensquare.recruit.pojo.Enterprise;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import util.IdWorker;
 
-import javax.persistence.Entity;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
