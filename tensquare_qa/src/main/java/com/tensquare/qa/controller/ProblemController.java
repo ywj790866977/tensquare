@@ -7,15 +7,17 @@ import com.tensquare.qa.service.ProblemService;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
+import io.jsonwebtoken.Claims;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Api(value = "/problem",tags = "问答模块")
 @RestController
@@ -32,10 +34,45 @@ public class ProblemController {
     @Autowired
     private BaseClient baseClient;
 
+    @PutMapping("/review/{problemId}")
+    public Result review(@PathVariable String problemId){
+        Claims claims = (Claims) request.getAttribute("claims_admin");
+        if(claims == null){
+            return new Result(false, StatusCode.ACCESSERROR,"权限不足");
+        }
+        problemService.review(problemId);
+        return new Result(true,StatusCode.OK,"审核成功");
+    }
+
+
+    @GetMapping("/userlist")
+    @ApiOperation(value = "用户问题",notes = "用户问题")
+    public Result userList(){
+        Claims claims = (Claims) request.getAttribute("claims_user");
+        if(claims == null){
+            return new Result(false, StatusCode.ACCESSERROR,"权限不足");
+        }
+        String userid = claims.getId();
+        List<Problem> list=  problemService.userlist(userid);
+        return new Result(true,StatusCode.OK,"查询成功",list);
+    }
+
+
+    @PutMapping("/top/{problemId}")
+    @ApiOperation(value = "顶帖",notes = "顶帖")
+    public Result topPost(@PathVariable String problemId){
+        int flag = problemService.topPost(problemId);
+        if(flag == 0){
+            return new Result(false,StatusCode.ERROR,"顶帖失败");
+        }
+        return new Result(true,StatusCode.OK,"顶帖成功");
+    }
+
     @GetMapping("/label/{labelId}")
     public Result findByLabelid(@PathVariable("labelId") String labelId){
         return baseClient.findById(labelId);
     }
+
 
 
     @PostMapping("/newlist/{labelId}/{page}/{size}")
@@ -79,8 +116,8 @@ public class ProblemController {
     @PostMapping
     @ApiOperation(value = "添加",notes = "添加")
     public Result save(@RequestBody Problem problem){
-        String token = (String) request.getAttribute("claims_user");
-        if(StringUtils.isEmpty(token)){
+        Claims claims = (Claims) request.getAttribute("claims_user");
+        if(claims == null){
             return new Result(false, StatusCode.ACCESSERROR,"权限不足");
         }
         problemService.save(problem);

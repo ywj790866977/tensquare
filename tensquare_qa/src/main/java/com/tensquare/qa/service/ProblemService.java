@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -56,6 +57,8 @@ public class ProblemService {
 
     public void save(Problem problem){
         problem.setId(idWorker.nextId()+"");
+        problem.setCreatetime(new Date());
+        problem.setUpdatetime(new Date());
         problemDao.save(problem);
     }
 
@@ -123,5 +126,48 @@ public class ProblemService {
             }
         },pageable);
 
+    }
+
+    /**
+     * @Description: topPost
+     * @param: problemId
+     * @Return: void
+     * @Date: 2019-12-31 15:09
+     */
+    public int topPost(String  problemId) {
+        //查询
+        Problem problem = this.findById(problemId);
+        if(problem == null){
+            throw new RuntimeException("不存在");
+        }
+        int flag = 0;
+        //判断是否有回答,或者没有解决
+        if(problem.getReply() == 0 || "0".equals(problem.getSolve())){
+            //可以顶帖
+            problemDao.updateBycreateDate(new Date(),problemId);
+            flag = 1;
+            return flag;
+        }
+        return flag;
+    }
+
+    /**
+     * @Description: userlist
+     * @param: userId
+     * @Return: java.util.List<com.tensquare.qa.pojo.Problem>
+     * @Date: 2019-12-31 16:35
+     */
+    public List<Problem> userlist(String userId) {
+        return problemDao.findByUserid(userId);
+    }
+
+    /** 
+     * @Description: review 
+ * @param: problemId
+     * @Return: void
+     * @Date: 2019-12-31 17:41
+     */ 
+    public void review(String problemId) {
+        problemDao.updateByStatus("1",problemId);
     }
 }

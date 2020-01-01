@@ -33,10 +33,10 @@ public class JwtInterceptor implements HandlerInterceptor {
                 String roles = (String) claims.get("roles");
                 if(roles !=null){
                     if("admin".equals(roles)){
-                        request.setAttribute("claims_admin",token);
+                        request.setAttribute("claims_admin",claims);
                     }
                     if("user".equals(roles)){
-                        request.setAttribute("claims_user",token);
+                        request.setAttribute("claims_user",claims);
                     }
                 }
 

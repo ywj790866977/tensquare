@@ -30,6 +30,15 @@ public class Problem {
     private String solve;
     private String replyname;
     private Date replytime;
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getId() {
         return id;
